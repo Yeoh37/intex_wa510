@@ -10,10 +10,10 @@ Home Assistant custom integration for the **Intex WA510 / AGP SMART SENSOR T3U**
 
 ## Features
 
-### Water Monitoring
+### Water monitoring
 
-- pH sensor
-- ORP sensor
+- pH
+- ORP
 - Water temperature
 - Free chlorine
 - Corrected free chlorine
@@ -23,23 +23,25 @@ Home Assistant custom integration for the **Intex WA510 / AGP SMART SENSOR T3U**
 ### Controls
 
 - Force measurement refresh
-- ORP setpoint control
 - pH setpoint control
+- ORP setpoint control
 
-### Maintenance Tracking
+### Maintenance tracking
 
 - Last cleaning date
 - Days since cleaning
 - Cleaning reminder
 - Configurable cleaning interval
+- Cleaning completed button
 
-### Calibration Tracking
+### Calibration tracking
 
 - Last pH calibration date
 - Last ORP calibration date
-- Days since calibration
+- Days since pH / ORP calibration
 - Calibration reminders
 - Configurable calibration intervals
+- Calibration completed buttons
 
 ### Diagnostics
 
@@ -69,13 +71,13 @@ https://github.com/Yeoh37/intex_wa510
 
 ## Configuration
 
-You will need Tuya IoT Platform credentials:
+You need Tuya IoT Platform credentials:
 
-- Access ID
-- Access Secret
+- Access ID / Client ID
+- Access Secret / Client Secret
 - Device ID
 
-The device must already be linked to your Tuya / Intex account.
+The WA510 device must already be linked to your Tuya / Intex account.
 
 For Europe, the default endpoint is:
 
@@ -85,7 +87,7 @@ https://openapi.tuyaeu.com
 
 ---
 
-## Supported Device
+## Supported device
 
 ### Intex WA510
 
@@ -97,7 +99,7 @@ Also sold as:
 
 ## Entities
 
-### Sensors
+### Main sensors
 
 - pH
 - ORP
@@ -105,16 +107,16 @@ Also sold as:
 - Free chlorine
 - Corrected free chlorine
 - Battery level
-- Last measurement timestamp
 
-### Binary Sensors
+### Binary sensors
 
-- Calibration required
-- Cleaning required
 - Maintenance required
+- Cleaning required
+- pH calibration required
+- ORP calibration required
 - Low battery
 
-### Numbers
+### Number entities
 
 - pH setpoint
 - ORP setpoint
@@ -129,9 +131,19 @@ Also sold as:
 - pH calibration completed
 - ORP calibration completed
 
+### Diagnostic entities
+
+- Last real measurement timestamp
+- Error code
+- Maintenance status
+- pH indicator
+- ORP indicator
+- Chlorine indicator
+- Calibration status
+
 ---
 
-## Important Notes
+## Important notes
 
 The calibration command buttons exposed by Tuya are experimental.
 
@@ -143,13 +155,13 @@ This project is experimental and is not affiliated with Intex, AGP, Tuya, or Hom
 
 ## Changelog
 
-### v0.5.2
+### v0.6.0
 
-- Fixed README logo URL for HACS using a GitHub raw image URL
-- Updated manifest version to 0.5.2
-- Kept local `logo.png` and `icon.png` at repository root and integration folder
-- Kept v0.5.1 cleanup:
-  - removed duplicate unavailable sensor entities for pH/ORP setpoints and maintenance thresholds
-  - clearer labels for calibration and maintenance items
-  - translated Tuya `off` indicator status to `Normal` / `Aucune`
-  - cleaner Configuration and Diagnostic sections
+Clean public release:
+- clean GitHub / HACS package structure
+- manifest version set to 0.6.0
+- README image uses GitHub raw URL for HACS
+- logo.png and icon.png included at repository root and in the integration folder
+- maintenance and calibration entities kept from v0.5.x
+- duplicated unavailable setpoint / threshold sensors removed
+- Tuya `off` indicator values translated to clearer statuses

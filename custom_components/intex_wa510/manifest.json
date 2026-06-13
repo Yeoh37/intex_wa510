@@ -7,5 +7,6 @@
   "documentation": "https://github.com/Yeoh37/intex_wa510",
   "iot_class": "cloud_polling",
   "requirements": [],
-  "version": "0.5.3"
+  "version": "0.6.0",
+  "issue_tracker": "https://github.com/Yeoh37/intex_wa510/issues"
 }

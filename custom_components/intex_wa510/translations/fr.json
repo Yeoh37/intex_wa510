@@ -1,9 +1,155 @@
 {
+  "entity": {
+    "sensor": {
+      "temperature_c": {
+        "name": "Temperature eau"
+      },
+      "ph": {
+        "name": "pH"
+      },
+      "orp": {
+        "name": "ORP"
+      },
+      "free_chlorine": {
+        "name": "Chlore libre"
+      },
+      "free_chlorine_chemical": {
+        "name": "Chlore libre corrige"
+      },
+      "battery": {
+        "name": "Batterie"
+      },
+      "ph_indicator": {
+        "name": "Indicateur pH",
+        "state": {
+          "normal": "Normal",
+          "ok": "OK",
+          "anomaly": "Anomalie"
+        }
+      },
+      "orp_indicator": {
+        "name": "Indicateur ORP",
+        "state": {
+          "normal": "Normal",
+          "ok": "OK",
+          "anomaly": "Anomalie"
+        }
+      },
+      "fc_indicator": {
+        "name": "Indicateur chlore",
+        "state": {
+          "normal": "Normal",
+          "ok": "OK",
+          "anomaly": "Anomalie"
+        }
+      },
+      "maintenance_indicator": {
+        "name": "Maintenance appareil",
+        "state": {
+          "none": "Aucune",
+          "required": "Maintenance requise"
+        }
+      },
+      "error_code": {
+        "name": "Code erreur"
+      },
+      "ph_caliberate": {
+        "name": "Calibration - Etat pH"
+      },
+      "orp_caliberate": {
+        "name": "Calibration - Etat ORP"
+      },
+      "last_cleaning": {
+        "name": "Entretien - Dernier nettoyage"
+      },
+      "last_ph_calibration": {
+        "name": "Calibration - Derniere pH"
+      },
+      "last_orp_calibration": {
+        "name": "Calibration - Derniere ORP"
+      },
+      "days_since_cleaning": {
+        "name": "Entretien - Jours depuis nettoyage"
+      },
+      "days_since_ph_calibration": {
+        "name": "Calibration - Jours depuis pH"
+      },
+      "days_since_orp_calibration": {
+        "name": "Calibration - Jours depuis ORP"
+      },
+      "last_measurement": {
+        "name": "Derniere mesure WA510"
+      }
+    },
+    "binary_sensor": {
+      "maintenance_required": {
+        "name": "Maintenance requise"
+      },
+      "cleaning_required": {
+        "name": "Entretien - Nettoyage requis"
+      },
+      "ph_calibration_required": {
+        "name": "Calibration - pH requise"
+      },
+      "orp_calibration_required": {
+        "name": "Calibration - ORP requise"
+      },
+      "battery_low": {
+        "name": "Batterie faible"
+      }
+    },
+    "number": {
+      "ph_set": {
+        "name": "Consigne pH"
+      },
+      "orp_set": {
+        "name": "Consigne ORP"
+      },
+      "cleaning_days": {
+        "name": "Entretien - Seuil nettoyage"
+      },
+      "ph_calibration_days": {
+        "name": "Calibration - Seuil pH"
+      },
+      "orp_calibration_days": {
+        "name": "Calibration - Seuil ORP"
+      }
+    },
+    "button": {
+      "refresh_measurement": {
+        "name": "Actualiser mesure"
+      },
+      "cleaning_done": {
+        "name": "Entretien - Nettoyage effectue"
+      },
+      "ph_calibration_done": {
+        "name": "Calibration - pH effectuee"
+      },
+      "orp_calibration_done": {
+        "name": "Calibration - ORP effectuee"
+      },
+      "ph_cal_start": {
+        "name": "Calibration - Demarrer pH"
+      },
+      "ph_cal_4": {
+        "name": "Calibration - Valider pH 4.00"
+      },
+      "ph_cal_9": {
+        "name": "Calibration - Valider pH 9.00"
+      },
+      "orp_cal_start": {
+        "name": "Calibration - Demarrer ORP"
+      },
+      "orp_cal_256": {
+        "name": "Calibration - Valider ORP 256 mV"
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {
-        "title": "Intex WA510 Water Analyzer",
-        "description": "Renseignez les identifiants Tuya Cloud.",
+        "title": "Intex WA510 Pool Water Analyzer",
+        "description": "Renseignez vos identifiants Tuya Cloud.",
         "data": {
           "access_id": "Access ID / Client ID",
           "access_secret": "Access Secret",

@@ -6,13 +6,19 @@ from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, DEVICE_NAME, DEVICE_MANUFACTURER, DEVICE_MODEL, DEVICE_SW_VERSION
+from .const import (
+    DOMAIN,
+    DEVICE_NAME,
+    DEVICE_MANUFACTURER,
+    DEVICE_MODEL,
+    DEVICE_SW_VERSION,
+)
 
 
 @dataclass(frozen=True)
 class NumberDef:
     key: str
-    name: str
+    translation_key: str
     suggested_object_id: str
     unit: str | None
     icon: str
@@ -26,17 +32,74 @@ class NumberDef:
 
 
 NUMBERS = [
-    NumberDef("ph_set", "Consigne pH", "piscine_reglage_ph", None, "mdi:target", 7.2, 7.8, 0.1, "tuya", "set_ph_target"),
-    NumberDef("orp_set", "Consigne ORP", "piscine_reglage_orp", "mV", "mdi:target", 650, 750, 10, "tuya", "set_orp_target"),
-    NumberDef("cleaning_days", "Entretien - Seuil nettoyage", "piscine_reglage_seuil_nettoyage", "j", "mdi:spray-bottle", 1, 365, 1, "storage", storage_key="cleaning_days"),
-    NumberDef("ph_calibration_days", "Calibration - Seuil pH", "piscine_reglage_seuil_calibration_ph", "j", "mdi:flask", 1, 365, 1, "storage", storage_key="ph_calibration_days"),
-    NumberDef("orp_calibration_days", "Calibration - Seuil ORP", "piscine_reglage_seuil_calibration_orp", "j", "mdi:flask", 1, 365, 1, "storage", storage_key="orp_calibration_days"),
+    NumberDef(
+        "ph_set",
+        "ph_set",
+        "pool_ph_target",
+        None,
+        "mdi:target",
+        7.2,
+        7.8,
+        0.1,
+        "tuya",
+        "set_ph_target",
+    ),
+    NumberDef(
+        "orp_set",
+        "orp_set",
+        "pool_orp_target",
+        "mV",
+        "mdi:target",
+        650,
+        750,
+        10,
+        "tuya",
+        "set_orp_target",
+    ),
+    NumberDef(
+        "cleaning_days",
+        "cleaning_days",
+        "pool_cleaning_threshold_days",
+        "j",
+        "mdi:spray-bottle",
+        1,
+        365,
+        1,
+        "storage",
+        storage_key="cleaning_days",
+    ),
+    NumberDef(
+        "ph_calibration_days",
+        "ph_calibration_days",
+        "pool_ph_calibration_threshold_days",
+        "j",
+        "mdi:flask",
+        1,
+        365,
+        1,
+        "storage",
+        storage_key="ph_calibration_days",
+    ),
+    NumberDef(
+        "orp_calibration_days",
+        "orp_calibration_days",
+        "pool_orp_calibration_threshold_days",
+        "j",
+        "mdi:flask",
+        1,
+        365,
+        1,
+        "storage",
+        storage_key="orp_calibration_days",
+    ),
 ]
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([IntexWA510Number(coordinator, entry, desc) for desc in NUMBERS], True)
+    async_add_entities(
+        [IntexWA510Number(coordinator, entry, desc) for desc in NUMBERS], True
+    )
 
 
 class IntexWA510Number(CoordinatorEntity, NumberEntity):
@@ -44,7 +107,7 @@ class IntexWA510Number(CoordinatorEntity, NumberEntity):
         super().__init__(coordinator)
         self.desc = desc
         self._attr_unique_id = f"{entry.entry_id}_{desc.key}_number"
-        self._attr_name = desc.name
+        self._attr_translation_key = desc.translation_key
         self._attr_has_entity_name = True
         self._attr_suggested_object_id = desc.suggested_object_id
         self._attr_native_unit_of_measurement = desc.unit
@@ -70,7 +133,9 @@ class IntexWA510Number(CoordinatorEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         if self.desc.action_type == "storage":
-            await self.coordinator.async_set_maintenance_threshold(self.desc.storage_key, value)
+            await self.coordinator.async_set_maintenance_threshold(
+                self.desc.storage_key, value
+            )
             return
 
         method = getattr(self.coordinator.client, self.desc.method_name)

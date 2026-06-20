@@ -92,7 +92,9 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "fc_indicator": self._indicator(raw.get("fc_indicator")),
             "orp_set": raw.get("orp_set"),
             "ph_set": self._scale(raw.get("ph_set"), 100),
-            "maintenance_indicator": self._maintenance_indicator(raw.get("maintenance_indicator")),
+            "maintenance_indicator": self._maintenance_indicator(
+                raw.get("maintenance_indicator")
+            ),
             "error_code": raw.get("error_code"),
             "refresh_switch": raw.get("refresh_switch"),
             "ph_caliberate": raw.get("ph_caliberate"),
@@ -107,8 +109,12 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "days_since_ph_calibration": self.days_since("last_ph_calibration"),
             "days_since_orp_calibration": self.days_since("last_orp_calibration"),
             "cleaning_days": self.get_int("cleaning_days", DEFAULT_CLEANING_DAYS),
-            "ph_calibration_days": self.get_int("ph_calibration_days", DEFAULT_PH_CALIBRATION_DAYS),
-            "orp_calibration_days": self.get_int("orp_calibration_days", DEFAULT_ORP_CALIBRATION_DAYS),
+            "ph_calibration_days": self.get_int(
+                "ph_calibration_days", DEFAULT_PH_CALIBRATION_DAYS
+            ),
+            "orp_calibration_days": self.get_int(
+                "orp_calibration_days", DEFAULT_ORP_CALIBRATION_DAYS
+            ),
             "last_measurement": last_measurement,
             "raw": raw,
         }
@@ -120,7 +126,9 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         await self._store.async_save(self.maintenance_data)
         await self.async_request_refresh()
 
-    async def async_set_maintenance_threshold(self, key: str | None, value: float) -> None:
+    async def async_set_maintenance_threshold(
+        self, key: str | None, value: float
+    ) -> None:
         if key is None:
             return
         self.maintenance_data[key] = int(value)
@@ -135,8 +143,12 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         async def delayed_refresh(now=None):
             await self.async_request_refresh()
 
-        self.hass.loop.call_later(20, lambda: self.hass.async_create_task(delayed_refresh()))
-        self.hass.loop.call_later(60, lambda: self.hass.async_create_task(delayed_refresh()))
+        self.hass.loop.call_later(
+            20, lambda: self.hass.async_create_task(delayed_refresh())
+        )
+        self.hass.loop.call_later(
+            60, lambda: self.hass.async_create_task(delayed_refresh())
+        )
 
     def days_since(self, key: str) -> int | None:
         value = self.maintenance_data.get(key)
@@ -152,7 +164,7 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         value = self.maintenance_data.get(key)
         try:
             return int(value)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return default
 
     @staticmethod
@@ -164,17 +176,17 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
     @staticmethod
     def _indicator(value):
         if value == "off":
-            return "Normal"
+            return "normal"
         if value == "green":
-            return "OK"
+            return "ok"
         if value == "red":
-            return "Anomalie"
+            return "anomaly"
         return value
 
     @staticmethod
     def _maintenance_indicator(value):
         if value == "off":
-            return "Aucune"
+            return "none"
         if value == "red":
-            return "Maintenance requise"
+            return "required"
         return value

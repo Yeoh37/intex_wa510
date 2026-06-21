@@ -22,6 +22,7 @@ BINARY_SENSORS = [
     BinarySensorDef("ph_calibration_required", "Calibration - pH requise", "piscine_calibration_ph_requise", "mdi:flask"),
     BinarySensorDef("orp_calibration_required", "Calibration - ORP requise", "piscine_calibration_orp_requise", "mdi:flask"),
     BinarySensorDef("battery_low", "Batterie faible", "piscine_batterie_faible", "mdi:battery-alert"),
+    BinarySensorDef("refreshing", "Actualisation en cours", "piscine_actualisation_en_cours", "mdi:sync"),
 ]
 
 
@@ -78,5 +79,8 @@ class IntexWA510BinarySensor(CoordinatorEntity, BinarySensorEntity):
             if battery is None:
                 return None
             return battery < 20
+
+        if self.desc.key == "refreshing":
+            return bool(self.coordinator.data.get("refreshing"))
 
         return None

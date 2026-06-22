@@ -21,8 +21,6 @@ from .const import (
     DEFAULT_ORP_CALIBRATION_DAYS,
     DEFAULT_PH_CALIBRATION_DAYS,
     DEFAULT_SCAN_INTERVAL,
-    FAST_REFRESH_INTERVAL,
-    FAST_REFRESH_SECONDS,
     DOMAIN,
     FAST_REFRESH_INTERVAL,
     FAST_REFRESH_SECONDS,
@@ -58,9 +56,6 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "orp_calibration_days": DEFAULT_ORP_CALIBRATION_DAYS,
             "last_measurement": None,
         }
-        self.fast_refresh_active = False
-        self._fast_refresh_handles = []
-
         self.fast_refresh_active = False
         self._fast_refresh_handles = []
 

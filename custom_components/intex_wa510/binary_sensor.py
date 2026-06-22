@@ -56,6 +56,7 @@ BINARY_SENSORS = [
     BinarySensorDef(
         "battery_low", "battery_low", "pool_battery_low", "mdi:battery-alert"
     ),
+    BinarySensorDef("refreshing", "refreshing", "pool_refreshing", "mdi:sync"),
 ]
 
 
@@ -127,5 +128,8 @@ class IntexWA510BinarySensor(CoordinatorEntity, BinarySensorEntity):
             if battery is None:
                 return None
             return battery < 20
+
+        if self.desc.key == "refreshing":
+            return bool(self.coordinator.data.get("refreshing"))
 
         return None

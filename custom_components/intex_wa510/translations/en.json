@@ -96,6 +96,9 @@
       },
       "battery_low": {
         "name": "Low battery"
+      },
+      "refreshing": {
+        "name": "Refreshing"
       }
     },
     "number": {

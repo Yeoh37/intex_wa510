@@ -1,5 +1,6 @@
 """Data coordinator for the Intex WA510 integration."""
 
+import contextlib
 from datetime import datetime, timedelta
 import logging
 
@@ -21,6 +22,8 @@ from .const import (
     DEFAULT_PH_CALIBRATION_DAYS,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    FAST_REFRESH_INTERVAL,
+    FAST_REFRESH_SECONDS,
     STORAGE_KEY,
     STORAGE_VERSION,
 )
@@ -53,6 +56,8 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "orp_calibration_days": DEFAULT_ORP_CALIBRATION_DAYS,
             "last_measurement": None,
         }
+        self.fast_refresh_active = False
+        self._fast_refresh_handles = []
 
         super().__init__(
             hass,
@@ -120,6 +125,7 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
                 "orp_calibration_days", DEFAULT_ORP_CALIBRATION_DAYS
             ),
             "last_measurement": last_measurement,
+            "refreshing": self.fast_refresh_active,
             "raw": raw,
         }
 
@@ -142,19 +148,61 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         await self.async_request_refresh()
 
     async def async_refresh_measurement_and_update(self) -> None:
-        """Force a WA510 measurement and refresh HA after a short delay."""
+        """Force a WA510 measurement then poll quickly for about 30 seconds."""
         await self.client.refresh_measurement()
+        self._start_fast_refresh_mode()
         await self.async_request_refresh()
 
-        async def delayed_refresh(now=None):
-            await self.async_request_refresh()
+    def _start_fast_refresh_mode(self) -> None:
+        """Start a temporary fast refresh window after a manual measurement request."""
+        self._cancel_fast_refresh_handles()
+        self.fast_refresh_active = True
+        self._notify_fast_refresh_state()
 
-        self.hass.loop.call_later(
-            20, lambda: self.hass.async_create_task(delayed_refresh())
+        for delay in range(
+            FAST_REFRESH_INTERVAL,
+            FAST_REFRESH_SECONDS + 1,
+            FAST_REFRESH_INTERVAL,
+        ):
+            handle = self.hass.loop.call_later(
+                delay,
+                lambda: self.hass.async_create_task(self._async_fast_refresh_tick()),
+            )
+            self._fast_refresh_handles.append(handle)
+
+        handle = self.hass.loop.call_later(
+            FAST_REFRESH_SECONDS + 1,
+            lambda: self.hass.async_create_task(self._async_stop_fast_refresh_mode()),
         )
-        self.hass.loop.call_later(
-            60, lambda: self.hass.async_create_task(delayed_refresh())
-        )
+        self._fast_refresh_handles.append(handle)
+
+    async def _async_fast_refresh_tick(self) -> None:
+        """Refresh values during the temporary fast refresh window."""
+        if not self.fast_refresh_active:
+            return
+        try:
+            await self.async_request_refresh()
+        except Exception:
+            _LOGGER.exception("WA510 FAST REFRESH ERROR")
+
+    async def _async_stop_fast_refresh_mode(self) -> None:
+        """Stop fast refresh mode and notify Home Assistant."""
+        self.fast_refresh_active = False
+        self._cancel_fast_refresh_handles()
+        self._notify_fast_refresh_state()
+
+    def _cancel_fast_refresh_handles(self) -> None:
+        for handle in self._fast_refresh_handles:
+            with contextlib.suppress(Exception):
+                handle.cancel()
+        self._fast_refresh_handles = []
+
+    def _notify_fast_refresh_state(self) -> None:
+        """Notify entities when only the fast refresh state changes."""
+        if self.data is not None:
+            updated = dict(self.data)
+            updated["refreshing"] = self.fast_refresh_active
+            self.async_set_updated_data(updated)
 
     def days_since(self, key: str) -> int | None:
         """Return days elapsed since a stored maintenance date."""

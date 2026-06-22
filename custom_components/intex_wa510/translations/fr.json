@@ -96,6 +96,9 @@
       },
       "battery_low": {
         "name": "Batterie faible"
+      },
+      "refreshing": {
+        "name": "Actualisation en cours"
       }
     },
     "number": {

@@ -1,12 +1,15 @@
-from __future__ import annotations
+"""Data coordinator for the Intex WA510 integration."""
 
-from datetime import date, datetime, timedelta
+import contextlib
+from datetime import datetime, timedelta
 import logging
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_ACCESS_ID,
@@ -18,9 +21,9 @@ from .const import (
     DEFAULT_ORP_CALIBRATION_DAYS,
     DEFAULT_PH_CALIBRATION_DAYS,
     DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
     FAST_REFRESH_INTERVAL,
     FAST_REFRESH_SECONDS,
-    DOMAIN,
     STORAGE_KEY,
     STORAGE_VERSION,
 )
@@ -32,7 +35,8 @@ _LOGGER = logging.getLogger(__name__)
 class IntexWA510Coordinator(DataUpdateCoordinator):
     """Fetch Intex WA510 data from Tuya Cloud and store maintenance dates."""
 
-    def __init__(self, hass: HomeAssistant, entry) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        """Initialize the coordinator and persistent maintenance store."""
         self.entry = entry
         self.client = TuyaCloudClient(
             async_get_clientsession(hass),
@@ -52,7 +56,6 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "orp_calibration_days": DEFAULT_ORP_CALIBRATION_DAYS,
             "last_measurement": None,
         }
-
         self.fast_refresh_active = False
         self._fast_refresh_handles = []
 
@@ -64,6 +67,7 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         )
 
     async def async_load_maintenance_data(self) -> None:
+        """Load persisted maintenance data from storage."""
         stored = await self._store.async_load()
         if isinstance(stored, dict):
             self.maintenance_data.update(stored)
@@ -97,7 +101,9 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "fc_indicator": self._indicator(raw.get("fc_indicator")),
             "orp_set": raw.get("orp_set"),
             "ph_set": self._scale(raw.get("ph_set"), 100),
-            "maintenance_indicator": self._maintenance_indicator(raw.get("maintenance_indicator")),
+            "maintenance_indicator": self._maintenance_indicator(
+                raw.get("maintenance_indicator")
+            ),
             "error_code": raw.get("error_code"),
             "refresh_switch": raw.get("refresh_switch"),
             "ph_caliberate": raw.get("ph_caliberate"),
@@ -112,21 +118,29 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             "days_since_ph_calibration": self.days_since("last_ph_calibration"),
             "days_since_orp_calibration": self.days_since("last_orp_calibration"),
             "cleaning_days": self.get_int("cleaning_days", DEFAULT_CLEANING_DAYS),
-            "ph_calibration_days": self.get_int("ph_calibration_days", DEFAULT_PH_CALIBRATION_DAYS),
-            "orp_calibration_days": self.get_int("orp_calibration_days", DEFAULT_ORP_CALIBRATION_DAYS),
+            "ph_calibration_days": self.get_int(
+                "ph_calibration_days", DEFAULT_PH_CALIBRATION_DAYS
+            ),
+            "orp_calibration_days": self.get_int(
+                "orp_calibration_days", DEFAULT_ORP_CALIBRATION_DAYS
+            ),
             "last_measurement": last_measurement,
             "refreshing": self.fast_refresh_active,
             "raw": raw,
         }
 
     async def async_mark_maintenance_done(self, key: str | None) -> None:
+        """Mark a maintenance task as completed today."""
         if key is None:
             return
-        self.maintenance_data[key] = date.today().isoformat()
+        self.maintenance_data[key] = dt_util.now().date().isoformat()
         await self._store.async_save(self.maintenance_data)
         await self.async_request_refresh()
 
-    async def async_set_maintenance_threshold(self, key: str | None, value: float) -> None:
+    async def async_set_maintenance_threshold(
+        self, key: str | None, value: float
+    ) -> None:
+        """Persist a maintenance threshold value and refresh entities."""
         if key is None:
             return
         self.maintenance_data[key] = int(value)
@@ -145,7 +159,11 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
         self.fast_refresh_active = True
         self._notify_fast_refresh_state()
 
-        for delay in range(FAST_REFRESH_INTERVAL, FAST_REFRESH_SECONDS + 1, FAST_REFRESH_INTERVAL):
+        for delay in range(
+            FAST_REFRESH_INTERVAL,
+            FAST_REFRESH_SECONDS + 1,
+            FAST_REFRESH_INTERVAL,
+        ):
             handle = self.hass.loop.call_later(
                 delay,
                 lambda: self.hass.async_create_task(self._async_fast_refresh_tick()),
@@ -164,7 +182,7 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             return
         try:
             await self.async_request_refresh()
-        except Exception:  # noqa: BLE001
+        except Exception:
             _LOGGER.exception("WA510 FAST REFRESH ERROR")
 
     async def _async_stop_fast_refresh_mode(self) -> None:
@@ -175,10 +193,8 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
 
     def _cancel_fast_refresh_handles(self) -> None:
         for handle in self._fast_refresh_handles:
-            try:
+            with contextlib.suppress(Exception):
                 handle.cancel()
-            except Exception:  # noqa: BLE001
-                pass
         self._fast_refresh_handles = []
 
     def _notify_fast_refresh_state(self) -> None:
@@ -189,6 +205,7 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             self.async_set_updated_data(updated)
 
     def days_since(self, key: str) -> int | None:
+        """Return days elapsed since a stored maintenance date."""
         value = self.maintenance_data.get(key)
         if not value:
             return None
@@ -196,13 +213,14 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
             stored_date = datetime.fromisoformat(str(value)).date()
         except ValueError:
             return None
-        return (date.today() - stored_date).days
+        return (dt_util.now().date() - stored_date).days
 
     def get_int(self, key: str, default: int) -> int:
+        """Return an integer threshold from storage or a default value."""
         value = self.maintenance_data.get(key)
         try:
             return int(value)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return default
 
     @staticmethod
@@ -214,17 +232,17 @@ class IntexWA510Coordinator(DataUpdateCoordinator):
     @staticmethod
     def _indicator(value):
         if value == "off":
-            return "Normal"
+            return "normal"
         if value == "green":
-            return "OK"
+            return "ok"
         if value == "red":
-            return "Anomalie"
+            return "anomaly"
         return value
 
     @staticmethod
     def _maintenance_indicator(value):
         if value == "off":
-            return "Aucune"
+            return "none"
         if value == "red":
-            return "Maintenance requise"
+            return "required"
         return value

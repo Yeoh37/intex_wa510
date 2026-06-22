@@ -1,21 +1,33 @@
-from __future__ import annotations
+"""Button entities for the Intex WA510 integration."""
 
 from dataclasses import dataclass
 import logging
 
 from homeassistant.components.button import ButtonEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, DEVICE_NAME, DEVICE_MANUFACTURER, DEVICE_MODEL, DEVICE_SW_VERSION
+from .const import (
+    DEVICE_MANUFACTURER,
+    DEVICE_MODEL,
+    DEVICE_NAME,
+    DEVICE_SW_VERSION,
+    DOMAIN,
+)
+from .coordinator import IntexWA510Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
 class ButtonDef:
+    """Describe a WA510 button entity."""
+
     key: str
-    name: str
+    translation_key: str
     suggested_object_id: str
     icon: str
     action_type: str
@@ -25,29 +37,109 @@ class ButtonDef:
 
 
 BUTTONS = [
-    ButtonDef("refresh_measurement", "Actualiser mesure", "piscine_actualiser_mesure", "mdi:refresh", "refresh"),
-    ButtonDef("cleaning_done", "Entretien - Nettoyage effectué", "piscine_nettoyage_wa510_effectue", "mdi:spray-bottle", "maintenance", maintenance_key="last_cleaning", entity_category=EntityCategory.CONFIG),
-    ButtonDef("ph_calibration_done", "Calibration - pH effectuée", "piscine_calibration_ph_effectuee", "mdi:flask-check", "maintenance", maintenance_key="last_ph_calibration", entity_category=EntityCategory.CONFIG),
-    ButtonDef("orp_calibration_done", "Calibration - ORP effectuée", "piscine_calibration_orp_effectuee", "mdi:flask-check-outline", "maintenance", maintenance_key="last_orp_calibration", entity_category=EntityCategory.CONFIG),
-    ButtonDef("ph_cal_start", "Calibration - Démarrer pH", "piscine_demarrer_calibration_ph", "mdi:flask-outline", "tuya", "start_ph_calibration", entity_category=EntityCategory.DIAGNOSTIC),
-    ButtonDef("ph_cal_4", "Calibration - Valider pH 4.00", "piscine_valider_ph_4", "mdi:numeric-4-circle-outline", "tuya", "validate_ph_4_calibration", entity_category=EntityCategory.DIAGNOSTIC),
-    ButtonDef("ph_cal_9", "Calibration - Valider pH 9.00", "piscine_valider_ph_9", "mdi:numeric-9-circle-outline", "tuya", "validate_ph_9_calibration", entity_category=EntityCategory.DIAGNOSTIC),
-    ButtonDef("orp_cal_start", "Calibration - Démarrer ORP", "piscine_demarrer_calibration_orp", "mdi:lightning-bolt-outline", "tuya", "start_orp_calibration", entity_category=EntityCategory.DIAGNOSTIC),
-    ButtonDef("orp_cal_256", "Calibration - Valider ORP 256 mV", "piscine_valider_orp_256", "mdi:lightning-bolt-circle", "tuya", "validate_orp_256_calibration", entity_category=EntityCategory.DIAGNOSTIC),
+    ButtonDef(
+        "refresh_measurement",
+        "refresh_measurement",
+        "pool_refresh_measurement",
+        "mdi:refresh",
+        "refresh",
+    ),
+    ButtonDef(
+        "cleaning_done",
+        "cleaning_done",
+        "pool_cleaning_done",
+        "mdi:spray-bottle",
+        "maintenance",
+        maintenance_key="last_cleaning",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    ButtonDef(
+        "ph_calibration_done",
+        "ph_calibration_done",
+        "pool_ph_calibration_done",
+        "mdi:flask-check",
+        "maintenance",
+        maintenance_key="last_ph_calibration",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    ButtonDef(
+        "orp_calibration_done",
+        "orp_calibration_done",
+        "pool_orp_calibration_done",
+        "mdi:flask-check-outline",
+        "maintenance",
+        maintenance_key="last_orp_calibration",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    ButtonDef(
+        "ph_cal_start",
+        "ph_cal_start",
+        "pool_start_ph_calibration",
+        "mdi:flask-outline",
+        "tuya",
+        "start_ph_calibration",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ButtonDef(
+        "ph_cal_4",
+        "ph_cal_4",
+        "pool_confirm_ph_4",
+        "mdi:numeric-4-circle-outline",
+        "tuya",
+        "validate_ph_4_calibration",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ButtonDef(
+        "ph_cal_9",
+        "ph_cal_9",
+        "pool_confirm_ph_9",
+        "mdi:numeric-9-circle-outline",
+        "tuya",
+        "validate_ph_9_calibration",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ButtonDef(
+        "orp_cal_start",
+        "orp_cal_start",
+        "pool_start_orp_calibration",
+        "mdi:lightning-bolt-outline",
+        "tuya",
+        "start_orp_calibration",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ButtonDef(
+        "orp_cal_256",
+        "orp_cal_256",
+        "pool_confirm_orp_256",
+        "mdi:lightning-bolt-circle",
+        "tuya",
+        "validate_orp_256_calibration",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 ]
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up WA510 buttons from a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([IntexWA510Button(coordinator, entry, desc) for desc in BUTTONS], True)
+    async_add_entities(
+        [IntexWA510Button(coordinator, entry, desc) for desc in BUTTONS], True
+    )
 
 
 class IntexWA510Button(CoordinatorEntity, ButtonEntity):
-    def __init__(self, coordinator, entry, desc: ButtonDef):
+    """WA510 button entity."""
+
+    def __init__(
+        self, coordinator: IntexWA510Coordinator, entry: ConfigEntry, desc: ButtonDef
+    ) -> None:
+        """Initialize the button entity."""
         super().__init__(coordinator)
         self.desc = desc
         self._attr_unique_id = f"{entry.entry_id}_{desc.key}"
-        self._attr_name = desc.name
+        self._attr_translation_key = desc.translation_key
         self._attr_has_entity_name = True
         self._attr_suggested_object_id = desc.suggested_object_id
         self._attr_icon = desc.icon
@@ -61,11 +153,14 @@ class IntexWA510Button(CoordinatorEntity, ButtonEntity):
         }
 
     async def async_press(self) -> None:
-        _LOGGER.info("WA510 BUTTON PRESSED: %s", self.desc.name)
+        """Handle button press actions."""
+        _LOGGER.info("WA510 BUTTON PRESSED: %s", self.desc.key)
 
         try:
             if self.desc.action_type == "maintenance":
-                await self.coordinator.async_mark_maintenance_done(self.desc.maintenance_key)
+                await self.coordinator.async_mark_maintenance_done(
+                    self.desc.maintenance_key
+                )
                 return
 
             if self.desc.action_type == "refresh":
@@ -74,8 +169,8 @@ class IntexWA510Button(CoordinatorEntity, ButtonEntity):
 
             method = getattr(self.coordinator.client, self.desc.method_name)
             result = await method()
-            _LOGGER.info("WA510 BUTTON RESULT: %s / result=%s", self.desc.name, result)
+            _LOGGER.info("WA510 BUTTON RESULT: %s / result=%s", self.desc.key, result)
             await self.coordinator.async_request_refresh()
 
-        except Exception as err:
-            _LOGGER.exception("WA510 BUTTON ERROR: %s / error=%s", self.desc.name, err)
+        except Exception:
+            _LOGGER.exception("WA510 BUTTON ERROR: %s", self.desc.key)

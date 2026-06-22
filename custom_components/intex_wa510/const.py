@@ -1,3 +1,5 @@
+"""Constants for the Intex WA510 custom integration."""
+
 DOMAIN = "intex_wa510"
 
 CONF_ACCESS_ID = "access_id"
@@ -15,7 +17,7 @@ DEFAULT_CLEANING_DAYS = 30
 DEFAULT_PH_CALIBRATION_DAYS = 120
 DEFAULT_ORP_CALIBRATION_DAYS = 120
 
-DEVICE_NAME = "Analyseur Piscine"
+DEVICE_NAME = "Pool Water Analyzer"
 DEVICE_MANUFACTURER = "Intex / AGP / Tuya"
 DEVICE_MODEL = "WA510 / AGP SMART SENSOR T3U"
 DEVICE_SW_VERSION = "0.6.3"

@@ -1,6 +1,6 @@
 {
   "domain": "intex_wa510",
-  "name": "Intex WA510 Water Analyzer",
+  "name": "Intex WA510 Pool Water Analyzer",
   "codeowners": [],
   "config_flow": true,
   "dependencies": [],

@@ -1,12 +1,18 @@
-from __future__ import annotations
+"""The Intex WA510 custom integration."""
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
 from .coordinator import IntexWA510Coordinator
 
-PLATFORMS = ["sensor", "binary_sensor", "button", "number"]
+PLATFORMS = [
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.NUMBER,
+    Platform.SENSOR,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

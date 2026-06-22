@@ -1,42 +1,90 @@
-from __future__ import annotations
+"""Binary sensors for the Intex WA510 integration."""
 
 from dataclasses import dataclass
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, DEVICE_NAME, DEVICE_MANUFACTURER, DEVICE_MODEL, DEVICE_SW_VERSION
+from .const import (
+    DEVICE_MANUFACTURER,
+    DEVICE_MODEL,
+    DEVICE_NAME,
+    DEVICE_SW_VERSION,
+    DOMAIN,
+)
+from .coordinator import IntexWA510Coordinator
 
 
 @dataclass(frozen=True)
 class BinarySensorDef:
+    """Describe a WA510 binary sensor entity."""
+
     key: str
-    name: str
+    translation_key: str
     suggested_object_id: str
     icon: str
 
 
 BINARY_SENSORS = [
-    BinarySensorDef("maintenance_required", "Maintenance requise", "piscine_maintenance_requise", "mdi:check-circle-outline"),
-    BinarySensorDef("cleaning_required", "Entretien - Nettoyage requis", "piscine_nettoyage_wa510_requis", "mdi:spray-bottle"),
-    BinarySensorDef("ph_calibration_required", "Calibration - pH requise", "piscine_calibration_ph_requise", "mdi:flask"),
-    BinarySensorDef("orp_calibration_required", "Calibration - ORP requise", "piscine_calibration_orp_requise", "mdi:flask"),
-    BinarySensorDef("battery_low", "Batterie faible", "piscine_batterie_faible", "mdi:battery-alert"),
-    BinarySensorDef("refreshing", "Actualisation en cours", "piscine_actualisation_en_cours", "mdi:sync"),
+    BinarySensorDef(
+        "maintenance_required",
+        "maintenance_required",
+        "pool_maintenance_required",
+        "mdi:check-circle-outline",
+    ),
+    BinarySensorDef(
+        "cleaning_required",
+        "cleaning_required",
+        "pool_cleaning_required",
+        "mdi:spray-bottle",
+    ),
+    BinarySensorDef(
+        "ph_calibration_required",
+        "ph_calibration_required",
+        "pool_ph_calibration_required",
+        "mdi:flask",
+    ),
+    BinarySensorDef(
+        "orp_calibration_required",
+        "orp_calibration_required",
+        "pool_orp_calibration_required",
+        "mdi:flask",
+    ),
+    BinarySensorDef(
+        "battery_low", "battery_low", "pool_battery_low", "mdi:battery-alert"
+    ),
+    BinarySensorDef("refreshing", "refreshing", "pool_refreshing", "mdi:sync"),
 ]
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up WA510 binary sensors from a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([IntexWA510BinarySensor(coordinator, entry, desc) for desc in BINARY_SENSORS], True)
+    async_add_entities(
+        [IntexWA510BinarySensor(coordinator, entry, desc) for desc in BINARY_SENSORS],
+        True,
+    )
 
 
 class IntexWA510BinarySensor(CoordinatorEntity, BinarySensorEntity):
-    def __init__(self, coordinator, entry, desc: BinarySensorDef):
+    """WA510 binary sensor entity."""
+
+    def __init__(
+        self,
+        coordinator: IntexWA510Coordinator,
+        entry: ConfigEntry,
+        desc: BinarySensorDef,
+    ) -> None:
+        """Initialize the binary sensor entity."""
         super().__init__(coordinator)
         self.desc = desc
         self._attr_unique_id = f"{entry.entry_id}_{desc.key}"
-        self._attr_name = desc.name
+        self._attr_translation_key = desc.translation_key
         self._attr_has_entity_name = True
         self._attr_suggested_object_id = desc.suggested_object_id
         self._attr_icon = desc.icon
@@ -49,7 +97,8 @@ class IntexWA510BinarySensor(CoordinatorEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool | None:
+        """Return whether the binary sensor is currently on."""
         if not self.coordinator.data:
             return None
 
@@ -57,7 +106,7 @@ class IntexWA510BinarySensor(CoordinatorEntity, BinarySensorEntity):
             value = self.coordinator.data.get("maintenance_indicator")
             if value is None:
                 return None
-            return value not in ("Aucune", "Normal", "off")
+            return value not in ("none", "normal", "off")
 
         if self.desc.key == "cleaning_required":
             days = self.coordinator.data.get("days_since_cleaning")

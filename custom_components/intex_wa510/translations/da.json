@@ -2,7 +2,7 @@
   "entity": {
     "sensor": {
       "temperature_c": {
-        "name": "Temperature eau"
+        "name": "Vandtemperatur"
       },
       "ph": {
         "name": "pH"
@@ -11,140 +11,140 @@
         "name": "ORP"
       },
       "free_chlorine": {
-        "name": "Chlore libre"
+        "name": "Frit klor"
       },
       "free_chlorine_chemical": {
-        "name": "Chlore libre corrige"
+        "name": "Korrigeret frit klor"
       },
       "battery": {
-        "name": "Batterie"
+        "name": "Batteri"
       },
       "ph_indicator": {
-        "name": "Indicateur pH",
+        "name": "pH-indikator",
         "state": {
           "normal": "Normal",
           "ok": "OK",
-          "anomaly": "Anomalie"
+          "anomaly": "Afvigelse"
         }
       },
       "orp_indicator": {
-        "name": "Indicateur ORP",
+        "name": "ORP-indikator",
         "state": {
           "normal": "Normal",
           "ok": "OK",
-          "anomaly": "Anomalie"
+          "anomaly": "Afvigelse"
         }
       },
       "fc_indicator": {
-        "name": "Indicateur chlore",
+        "name": "Klorindikator",
         "state": {
           "normal": "Normal",
           "ok": "OK",
-          "anomaly": "Anomalie"
+          "anomaly": "Afvigelse"
         }
       },
       "maintenance_indicator": {
-        "name": "Maintenance appareil",
+        "name": "Enhedsvedligeholdelse",
         "state": {
-          "none": "Aucune",
-          "required": "Maintenance requise"
+          "none": "Ingen",
+          "required": "Vedligeholdelse påkrævet"
         }
       },
       "error_code": {
-        "name": "Code erreur"
+        "name": "Fejlkode"
       },
       "ph_caliberate": {
-        "name": "Calibration - Etat pH"
+        "name": "Kalibrering - pH-status"
       },
       "orp_caliberate": {
-        "name": "Calibration - Etat ORP"
+        "name": "Kalibrering - ORP-status"
       },
       "last_cleaning": {
-        "name": "Entretien - Dernier nettoyage"
+        "name": "Vedligeholdelse - Seneste rengøring"
       },
       "last_ph_calibration": {
-        "name": "Calibration - Derniere pH"
+        "name": "Kalibrering - Seneste pH"
       },
       "last_orp_calibration": {
-        "name": "Calibration - Derniere ORP"
+        "name": "Kalibrering - Seneste ORP"
       },
       "days_since_cleaning": {
-        "name": "Entretien - Jours depuis nettoyage"
+        "name": "Vedligeholdelse - Dage siden rengøring"
       },
       "days_since_ph_calibration": {
-        "name": "Calibration - Jours depuis pH"
+        "name": "Kalibrering - Dage siden pH"
       },
       "days_since_orp_calibration": {
-        "name": "Calibration - Jours depuis ORP"
+        "name": "Kalibrering - Dage siden ORP"
       },
       "last_measurement": {
-        "name": "Derniere mesure WA510"
+        "name": "Seneste WA510-måling"
       }
     },
     "binary_sensor": {
       "maintenance_required": {
-        "name": "Maintenance requise"
+        "name": "Vedligeholdelse påkrævet"
       },
       "cleaning_required": {
-        "name": "Entretien - Nettoyage requis"
+        "name": "Vedligeholdelse - Rengøring påkrævet"
       },
       "ph_calibration_required": {
-        "name": "Calibration - pH requise"
+        "name": "Kalibrering - pH påkrævet"
       },
       "orp_calibration_required": {
-        "name": "Calibration - ORP requise"
+        "name": "Kalibrering - ORP påkrævet"
       },
       "battery_low": {
-        "name": "Batterie faible"
+        "name": "Lavt batteri"
       },
       "refreshing": {
-        "name": "Actualisation en cours"
+        "name": "Opdaterer"
       }
     },
     "number": {
       "ph_set": {
-        "name": "Consigne pH"
+        "name": "pH-mål"
       },
       "orp_set": {
-        "name": "Consigne ORP"
+        "name": "ORP-mål"
       },
       "cleaning_days": {
-        "name": "Entretien - Seuil nettoyage"
+        "name": "Vedligeholdelse - Rengøringstærskel"
       },
       "ph_calibration_days": {
-        "name": "Calibration - Seuil pH"
+        "name": "Kalibrering - pH-tærskel"
       },
       "orp_calibration_days": {
-        "name": "Calibration - Seuil ORP"
+        "name": "Kalibrering - ORP-tærskel"
       }
     },
     "button": {
       "refresh_measurement": {
-        "name": "Actualiser mesure"
+        "name": "Opdater måling"
       },
       "cleaning_done": {
-        "name": "Entretien - Nettoyage effectue"
+        "name": "Vedligeholdelse - Rengøring udført"
       },
       "ph_calibration_done": {
-        "name": "Calibration - pH effectuee"
+        "name": "Kalibrering - pH udført"
       },
       "orp_calibration_done": {
-        "name": "Calibration - ORP effectuee"
+        "name": "Kalibrering - ORP udført"
       },
       "ph_cal_start": {
-        "name": "Calibration - Demarrer pH"
+        "name": "Kalibrering - Start pH"
       },
       "ph_cal_4": {
-        "name": "Calibration - Valider pH 4.00"
+        "name": "Kalibrering - Bekræft pH 4,00"
       },
       "ph_cal_9": {
-        "name": "Calibration - Valider pH 9.00"
+        "name": "Kalibrering - Bekræft pH 9,00"
       },
       "orp_cal_start": {
-        "name": "Calibration - Demarrer ORP"
+        "name": "Kalibrering - Start ORP"
       },
       "orp_cal_256": {
-        "name": "Calibration - Valider ORP 256 mV"
+        "name": "Kalibrering - Bekræft ORP 256 mV"
       }
     }
   },
@@ -152,12 +152,12 @@
     "step": {
       "user": {
         "title": "Intex WA510 Pool Water Analyzer",
-        "description": "Renseignez vos identifiants Tuya Cloud.",
+        "description": "Indtast dine Tuya Cloud-legitimationsoplysninger.",
         "data": {
           "access_id": "Access ID / Client ID",
           "access_secret": "Access Secret",
           "device_id": "Device ID",
-          "endpoint": "Endpoint Tuya"
+          "endpoint": "Tuya-endpoint"
         }
       }
     }

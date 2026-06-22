@@ -1,4 +1,4 @@
-from __future__ import annotations
+"""Config flow for the Intex WA510 integration."""
 
 import voluptuous as vol
 
@@ -19,7 +19,10 @@ class IntexWA510ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: dict[str, str] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Handle the user step to collect Tuya credentials and device ID."""
         errors = {}
 
         if user_input is not None:
